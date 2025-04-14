@@ -46,7 +46,7 @@ const App = () => {
   useEffect(() => {
     const savedMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(savedMode);
-    setIsModeReady(true); // ⬅️ صار جاهز
+    setIsModeReady(true);
   }, []);
 
   // save mode to storage
@@ -67,6 +67,16 @@ const App = () => {
       document.body.classList.remove("darkMode");
     }
   }, [isDarkMode, isModeReady]);
+  // useEffect to control the message apperance
+  useEffect(() => {
+    const goodJob = document.getElementById('goodJob');
+    if (goodJob && goodJob.classList.contains('goodJobShow') ) {
+      const timer = setTimeout(() => {
+        goodJob.classList.remove('goodJobShow');
+      },5000);
+      return () => clearTimeout(timer);
+    }
+  }, [todos]);
 
   if (!isModeReady) return null;
 
@@ -88,7 +98,7 @@ const App = () => {
         </p>
       </div>
 
-      <p id='goodJob' className={`gootJob ${todos.length === todos.filter(todo => todo.checked).length ? 'goodJobShow' : ''}`}>
+      <p id='goodJob' className={`gootJob ${todos.length === todos.filter(todo => todo.checked).length && todos.length != 0 ? 'goodJobShow' : ''}`}>
         Good Job! <br />You have done everything today
       </p>
 

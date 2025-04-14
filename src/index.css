@@ -154,8 +154,8 @@ header button:hover {
   top: 7%;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #202124;
-  color: white;
+  background-color:var(--text-color);
+  color: var(--containers-bg);
   padding: 14px;
   font-family: 'Press Start 2P', system-ui;
   border-radius: 14px;
@@ -192,7 +192,9 @@ header button:hover {
   width: fit-content;
   margin: 0 auto;
 }
-
+#darkModeToggler i{
+  font-size: 1.2rem;
+}
 /* Responsive tweaks */
 @media (min-width: 640px) {
   header button,
