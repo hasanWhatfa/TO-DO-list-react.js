@@ -1,80 +1,105 @@
-import TodoInput from "./components/TodoInput/TodoInput"
-import TodoList from "./components/TodoList/TodoList"
-import './App.css'
+import TodoInput from "./components/TodoInput/TodoInput";
+import TodoList from "./components/TodoList/TodoList";
+import './App.css';
 import { useEffect, useState } from "react";
 
 const App = () => {
-
-  // Declare state to keep track of all todos in the list
-  // Starts empty, but will be updated as user adds/removes items
-  const [ todos, setTodos] = useState([]);
-
-  // State to hold the current value of the input field (i.e., what user is typing)
+  const [todos, setTodos] = useState([]);
   const [todoValue , setTodoValue] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isModeReady, setIsModeReady] = useState(false); // ⬅️ حالة تحميل الوضع
 
-  // Function to save the updated todo list to localStorage
-  // This allows the app to persist data even after page reloads
   const storeData = (newList) => {
     localStorage.setItem('todos', JSON.stringify({
       todos: newList
-    }))
+    }));
   }
 
-  // Adds a new todo item to the list
-  // It creates a new array with the old todos + the new one
-  // Updates both the UI and localStorage
   const handleAddTodo = (newTodo) => {
-    const newTodos = [...todos, newTodo];
+    const newTodoObject = { text: newTodo, checked: false };
+    const newTodos = [...todos, newTodoObject];
     storeData(newTodos);
     setTodos(newTodos);
   }
 
-  // Handles deletion of a todo based on its index in the array
-  // Filters out the todo that matches the index and updates state/localStorage
   const handleDeletTodo = (index) => {
-    const newTodos = todos.filter((todo, todoIndex) => {
-      return todoIndex !== index;
-    })
+    const newTodos = todos.filter((todo, todoIndex) => todoIndex !== index);
     storeData(newTodos);
     setTodos(newTodos);
   }
 
-  // Handles updating a todo:
-  // 1. Gets the selected todo value by its index
-  // 2. Fills the input field with that value for editing
-  // 3. Deletes the old version from the list (to be replaced after editing)
   const handleUpdateTodo = (index) => {
     const updatedTodo = todos[index];
-    setTodoValue(updatedTodo); // show it in input
-    handleDeletTodo(index);    // remove old version
+    setTodoValue(updatedTodo.text);
+    handleDeletTodo(index);
   }
 
-  // On component mount, fetch stored todos from localStorage (if any) and load into state
-  // This helps persist the list between page refreshes
+  // read todos from storage
   useEffect(() => {
     let storedTodos = JSON.parse(localStorage.getItem('todos'));
     if (storedTodos) {
-      setTodos(storedTodos.todos)
+      setTodos(storedTodos.todos);
     }
-    else return
-  }, [])
+  }, []);
 
-  // Render the input field and the todo list
-  // Pass down necessary state and functions as props
+  // read mode from storage (once)
+  useEffect(() => {
+    const savedMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedMode);
+    setIsModeReady(true); // ⬅️ صار جاهز
+  }, []);
+
+  // save mode to storage
+  useEffect(() => {
+    if (isModeReady) {
+      localStorage.setItem('darkMode', isDarkMode);
+    }
+  }, [isDarkMode, isModeReady]);
+
+  // apply class to body
+  useEffect(() => {
+    if (!isModeReady) return;
+    if (isDarkMode) {
+      document.body.classList.add("darkMode");
+      document.body.classList.remove("lightMode");
+    } else {
+      document.body.classList.add("lightMode");
+      document.body.classList.remove("darkMode");
+    }
+  }, [isDarkMode, isModeReady]);
+
+  if (!isModeReady) return null;
+
   return (
-    <>
+    <div className={`newMainContainer ${isDarkMode ? 'darkMode' : 'lightMode'}`}>
+      <button onClick={() => setIsDarkMode(!isDarkMode)} id="darkModeToggler">
+        <i className="fa-solid fa-circle-half-stroke"></i> : {isDarkMode ? 'Dark Mode' : "Light Mode"}
+      </button>
+
       <TodoInput 
         handleAddTodo={handleAddTodo} 
         todoValue={todoValue} 
         setTodoValue={setTodoValue}
       />
+
+      <div className="ProgressShow">
+        <p>
+          {todos.filter(todo => todo.checked).length} / {todos.length} done
+        </p>
+      </div>
+
+      <p id='goodJob' className={`gootJob ${todos.length === todos.filter(todo => todo.checked).length ? 'goodJobShow' : ''}`}>
+        Good Job! <br />You have done everything today
+      </p>
+
       <TodoList  
         todos={todos} 
+        setTodos={setTodos}
         handleDeletTodo={handleDeletTodo} 
         handleUpdateTodo={handleUpdateTodo}
       />
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default App
+export default App;

@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const TodoInput = (props) => {
-    // Destructure props received from App component
     const { handleAddTodo, todoValue, setTodoValue } = props;
 
     return (
@@ -11,17 +10,20 @@ const TodoInput = (props) => {
                 placeholder="Enter todo...." 
                 value={todoValue} 
                 onChange={(e) => {
-                    // Update the input value in state as user types
                     setTodoValue(e.target.value)
                 }}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" && todoValue !== '') {
+                      handleAddTodo(todoValue);
+                      setTodoValue('');
+                    }
+                  }}
             />
             
             <button onClick={() => {
-                // Prevent adding an empty todo
                 if (todoValue === '') {
-                    // Optionally: could show a warning or shake animation here
+                    // could show a warning
                 } else {
-                    // Add the new todo and reset the input field
                     handleAddTodo(todoValue);
                     setTodoValue('')
                 }
@@ -32,4 +34,4 @@ const TodoInput = (props) => {
     )
 }
 
-export default TodoInput
+export default TodoInput;
